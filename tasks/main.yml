@@ -1,2 +1,86 @@
 ---
 # tasks file for ansible-docker-install
+  - name: install utilities
+    yum:
+    name:
+      - bash-completion
+      - tmux
+      - telnet
+      - bind-utils
+      - tcpdump
+      - wget
+      - lsof
+      - rsync
+    state: present
+
+  - name: perform update
+      yum:
+      name: '*'
+      state: present
+
+  - name: disable firewalld
+    service:
+      name: firewalld
+      state: stopped
+      enabled: no
+
+  - name: mask firewalld
+    shell: systemctl mask firewalld
+
+  - name: install iptables
+    yum:
+      name: iptables-services
+      state: present
+
+  - name: start and enable iptables
+    service:
+      name: iptables
+      state: started
+      enabled: yes    
+
+  - name: configure iptables rules
+    template:
+      src: iptables.j2
+      dest: /etc/sysconfig/iptables
+
+  - name: configure ip6tables rules
+    template:
+      src: ip6tables.j2
+      dest: /etc/sysconfig/ip6tables
+
+  - name: apply iptables rules
+    shell: iptables-restore < /etc/sysconfig/iptables
+
+  - name: apply ip6tables rules
+    shell: ip6tables-restore < /etc/sysconfig/ip6tables
+
+  - name: install docker dependencies
+    yum:
+      name:
+        - device-mapper-persistent-data
+        - lvm2
+
+  - name: configure docker repo
+    get_url:
+      url: https://download.docker.com/linux/centos/docker-ce.repo
+      dest: /etc/yum.repos.d
+
+  - name: install docker and git packages
+    yum:
+      name:
+        - docker-ce
+        - docker-ce-cli
+        - container.io
+        - git
+
+  - name: start and enable docker 
+    service:
+      name: docker
+      state: started
+      enabled: yes
+
+  - name: install docker compose
+    get_url: 
+      url: https://github.com/docker/compose/releases/download/1.25.5/docker-compose-Linux-x86_64
+      dest: /usr/local/bin/docker-compose
+      mode: 0755
