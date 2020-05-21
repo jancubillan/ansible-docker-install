@@ -2,19 +2,19 @@
 # tasks file for ansible-docker-install
   - name: install utilities
     yum:
-    name:
-      - bash-completion
-      - tmux
-      - telnet
-      - bind-utils
-      - tcpdump
-      - wget
-      - lsof
-      - rsync
-    state: present
+      name:
+        - bash-completion
+        - tmux
+        - telnet
+        - bind-utils
+        - tcpdump
+        - wget
+        - lsof
+        - rsync
+      state: present
 
   - name: perform update
-      yum:
+    yum:
       name: '*'
       state: present
 
